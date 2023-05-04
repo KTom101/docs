@@ -1,0 +1,48 @@
+name: Grammar Check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  grammar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+
+      - name: Install Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+        
+      - name: Get list of modified files
+        id: modified-files
+        run: |
+          git fetch --no-tags --prune --depth=1 origin +refs/heads/${{ github.event.pull_request.head.ref }}:
+          echo "::set-output name=files::$(git diff --name-only ${{ github.event.pull_request.head.sha }}^ ${{ github.event.pull_request.head.sha }})"
+        
+      - name: Extract Markdown body
+        id: extract-body
+        run: |
+          echo "${{ steps.modified-files.outputs.files }}"
+          npx remark-cli extract --from ${{ steps.modified-files.outputs.files }} > body.md
+      - name: LanguageTool Check
+        id: language-tool
+        run: |
+          echo "${{ steps.extract-body.outputs.body }}" > body.md
+          cat ${{ steps.modified-files.outputs.files }} | xargs -I{} sh -c 'languagetool -l en-US -c utf-8 -v {} 2>&1 | grep -v "will be ignored" || true'
+        continue-on-error: true
+        
+      - name: Review LanguageTool errors
+        if: ${{ always() }}
+        uses: reviewdog/action-languagetool@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          reporter: github-pr-review
+          level: info
