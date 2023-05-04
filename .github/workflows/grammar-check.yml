@@ -10,28 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-#       - name: Install Node.js
-#         uses: actions/setup-node@v2
-#         with:
-#           node-version: '16.x'
-
-#       - name: Install Java
-#         uses: actions/setup-java@v2
-#         with:
-#           distribution: 'adopt'
-#           java-version: '17'
-        
-#       - name: Get list of modified files
-#         id: modified-files
-#         run: |
-#           git fetch --no-tags --prune --depth=1 origin +refs/heads/${{ github.event.pull_request.head.ref }}:
-#           echo ${{ join(git diff --name-only ${{ github.event.pull_request.head.sha }}^ ${{ github.event.pull_request.head.sha }}) }} > modified-files.txt
-        
-#       - name: Extract Markdown body
-#         id: extract-body
-#         run: |
-#           npx remark-cli extract --from $(cat modified-files.txt) > body.md
-#           echo "::set-env name=BODY::$(cat body.md)"
 
       - name: LanguageTool Check
         id: language-tool
