@@ -1,1 +1,1 @@
-content/cpp/concepts/structure/structure.md
+content/css/concepts/floats/floats.md
